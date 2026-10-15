@@ -1,0 +1,23 @@
+name: Build Windows EXE
+on:
+  push:
+    branches: [task-manager-build]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Test
+        run: dotnet test SimpleTaskManager.Tests/SimpleTaskManager.Tests.csproj
+      - name: Publish single-file EXE
+        run: dotnet publish SimpleTaskManager/SimpleTaskManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: SimpleTaskManager-Windows
+          path: publish/SimpleTaskManager.exe
